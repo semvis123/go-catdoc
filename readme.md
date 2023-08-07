@@ -1,4 +1,4 @@
-## Go-Catdoc, get text and metadata from .doc files.
+## Go-catdoc, get text and metadata from .doc files.
 Uses Wazero to run catdoc as webassembly in Go.
 The catdoc source is slightly modified to support reading metadata in `.doc`.
 The msdoc.hexpat file is a pattern file for imhex that can parse the `summaryinformation` ole object inside the `.doc` file.
