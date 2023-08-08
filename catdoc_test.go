@@ -1,9 +1,9 @@
 package gocatdoc_test
 
 import (
+	gocatdoc "github.com/semvis123/go-catdoc"
 	"io"
 	"os"
-	gocatdoc "semvis123/go-catdoc"
 	"testing"
 )
 
