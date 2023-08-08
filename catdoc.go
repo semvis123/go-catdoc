@@ -102,6 +102,14 @@ func GetCommentsFromFile(file io.ReadSeeker) (string, error) {
 	return callWASMFuncWithFile("get_comments", file)
 }
 
+func GetAnnotationAuthorsFromFile(file io.ReadSeeker) ([]string, error) {
+	r, err := callWASMFuncWithFile("get_annotation_authors", file)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(r, "\n"), nil
+}
+
 func GetVersion() (string, error) {
 	return callWASMFunc("get_version", nil)
 }

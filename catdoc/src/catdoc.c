@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
   get_locale_charset();
 #endif
   metadata metadata_type = none;
-  while ((c = getopt(argc, argv, "Vls:d:f:taubxv8wALTSKCm:")) != -1) {
+  while ((c = getopt(argc, argv, "Vls:d:f:taubxv8wALTSKCUm:")) != -1) {
     switch (c) {
     case 's':
       check_charset(&source_csname, optarg);
@@ -103,6 +103,9 @@ int main(int argc, char **argv) {
       break;
     case 'C':
       metadata_type = comments;
+      break;
+    case 'U':
+      metadata_type = annotation_authors;
       break;
     case 'm': {
       char *endptr;
@@ -244,5 +247,10 @@ void get_keywords() {
 }
 void get_comments() {
   char *args[] = {"", "-C", "/input_file/file.doc"};
+  main(3, args);
+}
+
+void get_annotation_authors() {
+  char *args[] = {"", "-U", "/input_file/file.doc"};
   main(3, args);
 }

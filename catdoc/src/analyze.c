@@ -18,6 +18,9 @@ extern char ole_sign[], zip_sign[]; /* from ole.c */
 char rtf_sign[] = "{\\rtf";
 char old_word_sign[] = {0xdb, 0xa5, 0};
 char write_sign[] = {0x31, 0xBE, 0};
+unsigned char sttbfRMark[] = {0x00, 0x00, 0x07, 0x00, 0x55, 0x00,
+                              0x6E, 0x00, 0x6B, 0x00, 0x6E, 0x00,
+                              0x6F, 0x00, 0x77, 0x00, 0x6E, 0x00};
 int verbose = 0;
 
 unsigned char *read_metadata(unsigned char *buffer, metadata metadata_type) {
@@ -38,6 +41,64 @@ unsigned char *read_metadata(unsigned char *buffer, metadata metadata_type) {
   return NULL;
 }
 
+int find_offset(FILE *f, unsigned char *mark, int mark_length) {
+  int offset = 0;
+  int block_size = 1024 * 25;
+  int pos = 0;
+  int bpos = 0;
+  unsigned char buf[block_size];
+  int block_n = 0;
+
+  while (!feof(f)) {
+    long n = fread(buf, 1, block_size, f);
+    while (bpos != n) {
+      if (buf[bpos] == mark[pos]) {
+        pos++;
+        bpos++;
+        if (pos == mark_length) {
+          offset = block_n * block_size + bpos - pos;
+          return offset;
+        }
+      } else {
+        bpos -= pos;
+        bpos++;
+        pos = 0;
+      }
+    }
+    bpos = 0;
+    block_n++;
+  }
+  fprintf(stderr, "stttbfRMark offset is not found");
+  exit(1);
+}
+
+void read_annotation_authors(FILE *f) {
+  int offset = find_offset(f, sttbfRMark, 18) - 4;
+  fseek(f, offset, SEEK_SET);
+
+  int block_size = 1024;
+  unsigned char buf[2];
+  fread(buf, 1, 2, f);
+  if (buf[0] != 0xff || buf[1] != 0xff) {
+    fprintf(stderr, "stttbfRMark offset is invalid");
+    exit(1);
+  }
+  fread(buf, 1, 2, f);
+  unsigned int count = getshort(buf, 0) - 1;
+  fseek(f, 18, SEEK_CUR);
+  for (int i = 0; i < count; i++) {
+    fread(buf, 1, 2, f);
+    unsigned int str_len = getshort(buf, 0);
+    unsigned short *str = calloc(str_len, 2);
+    fread(str, 2, str_len, f);
+    for (int j = 0; j < str_len; j++) {
+      printf("%lc", str[j]);
+    }
+    printf("\n");
+    free(str);
+  }
+}
+
 /*********************************************************************
  * Determines format of input file and calls parse_word_header or
  * process_file if
@@ -45,6 +106,10 @@ unsigned char *read_metadata(unsigned char *buffer, metadata metadata_type) {
  * return not 0 when error
  ********************************************************************/
 int analyze_format(FILE *f, metadata metadata_type) {
+  if (metadata_type == annotation_authors) {
+    read_annotation_authors(f);
+    return 0;
+  }
   unsigned char buffer[129];
   long offset = 0;
   FILE *new_file, *ole_file;

@@ -227,6 +227,7 @@ void get_title();
 void get_subject();
 void get_keywords();
 void get_comments();
+void get_annotation_authors();
 
 char *find_file(char *name, const char *path);
 char *stradd(const char *s1, const char *s2);
@@ -255,7 +256,8 @@ typedef enum {
   title,
   subject,
   keywords,
-  comments
+  comments,
+  annotation_authors
 } metadata;
 int analyze_format(FILE *f, metadata metadata_type);
 void list_charsets(void);

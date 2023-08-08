@@ -31,6 +31,22 @@ func testFileFunc(title, expected string, fun func(io.ReadSeeker) (string, error
 	}
 }
 
+func testFileFuncArr(title string, expected []string, fun func(io.ReadSeeker) ([]string, error), t *testing.T) {
+	f, err := os.Open("test.doc")
+	if err != nil {
+		t.Fatalf("could not open test document, %v", err)
+	}
+	arr, err := fun(f)
+	if err != nil {
+		t.Fatalf("expected error to be nil, got %v", err)
+	}
+	for i := range expected {
+		if arr[i] != expected[i] {
+			t.Fatalf("expected %s to be \"%v\", got %v", title, expected, arr)
+		}
+	}
+}
+
 func TestGetTextFromFile(t *testing.T) {
 	testFileFunc("text", "text-inside-doc", gocatdoc.GetTextFromFile, t)
 }
@@ -57,4 +73,8 @@ func TestGetKeywordsFromFile(t *testing.T) {
 
 func TestGetCommentsFromFile(t *testing.T) {
 	testFileFunc("comments", "Comments", gocatdoc.GetCommentsFromFile, t)
+}
+
+func TestGetAnnotationAuthorsFromFile(t *testing.T) {
+	testFileFuncArr("annoation_authors", []string{"H. Potter"}, gocatdoc.GetAnnotationAuthorsFromFile, t)
 }
