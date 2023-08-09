@@ -133,7 +133,7 @@ func callWASMFunc(funcName string, fs fs.FS) (string, error) {
 	_, err = mod.ExportedFunction(funcName).Call(ctx)
 	if err != nil {
 		if exitError, ok := err.(*sys.ExitError); ok && exitError.ExitCode() != 0 {
-			return "", fmt.Errorf("%s %w", outBuf.String(), exitError)
+			return "", fmt.Errorf("%s %w", errBuf.String(), exitError)
 		}
 	}
 
